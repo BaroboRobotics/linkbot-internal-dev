@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Tue Dec 29 13:21:15 2015
+# Created: Tue Dec 29 15:11:57 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -271,9 +271,9 @@ class Ui_MainWindow(object):
         self.groupBox_serialId.setObjectName(_fromUtf8("groupBox_serialId"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox_serialId)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.lineEdit = QtGui.QLineEdit(self.groupBox_serialId)
-        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
-        self.verticalLayout_2.addWidget(self.lineEdit)
+        self.lineEdit_id = QtGui.QLineEdit(self.groupBox_serialId)
+        self.lineEdit_id.setObjectName(_fromUtf8("lineEdit_id"))
+        self.verticalLayout_2.addWidget(self.lineEdit_id)
         self.pushButton_getid = QtGui.QPushButton(self.groupBox_serialId)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)

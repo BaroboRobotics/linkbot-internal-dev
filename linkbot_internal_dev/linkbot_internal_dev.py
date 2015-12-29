@@ -17,6 +17,7 @@ except:
 import linkbot
 import sys
 import time
+import traceback
 
 class StartQT4(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -27,6 +28,16 @@ class StartQT4(QtGui.QMainWindow):
         self.setWindowTitle('Linkbot Testing Suite ' + __version__)
 
         self.connect_preassembly_buttons()
+
+        self.ui.pushButton_getid.clicked.connect(self.get_id)
+
+        self.ui.pushButton_setid.setEnabled(False)
+        self.ui.pushButton_setid.clicked.connect(self.set_id)
+        self.ui.lineEdit_id.returnPressed.connect(self.set_id)
+        self.ui.lineEdit_id.textChanged.connect(self.id_text_modified)
+
+    def message_box(self, title, message):
+        QtGui.QMessageBox.information(self, title, message)
 
     def preassembly_reset(self):
         try:
@@ -50,12 +61,15 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.pushButton_preassembly_finish.clicked.connect(self.preassembly_finish)
 
     def preassembly_start(self):
-        self.ui.groupBox_serialId.setEnabled(False)
-        self.ui.groupBox_postassembly.setEnabled(False)
-        self.ui.stackedWidget.setCurrentIndex(1)
-        self.linkbot = linkbot.Linkbot()
-        self.test = preassembly.TestLedRed(self, linkbot=self.linkbot)
-        self.test.enter()
+        try:
+            self.linkbot = linkbot.Linkbot()
+            self.ui.groupBox_serialId.setEnabled(False)
+            self.ui.groupBox_postassembly.setEnabled(False)
+            self.ui.stackedWidget.setCurrentIndex(1)
+            self.test = preassembly.TestLedRed(self, linkbot=self.linkbot)
+            self.test.enter()
+        except Exception as e:
+            self.message_box("Error", str(traceback.format_exc()))
 
     def preassembly_1(self):
         self.ui.stackedWidget.setCurrentIndex(2)
@@ -122,6 +136,33 @@ class StartQT4(QtGui.QMainWindow):
     def preassembly_finish(self):
         self.ui.stackedWidget.setCurrentIndex(0)
         self.preassembly_reset()
+
+    def get_id(self):
+        try:
+            l = linkbot.Linkbot()
+            self.message_box("Serial ID", l.get_serial_id())
+        except:
+            self.message_box("Error", str(traceback.format_exc()))
+
+    def set_id(self):
+        if len(self.ui.lineEdit_id.text()) != 4:
+            self.message_box("Error", 
+                    "Serial ID must be 4 characters in length.")
+            return
+        try:
+            l = linkbot.Linkbot()
+            l._setSerialId(self.ui.lineEdit_id.text().upper())
+            l.set_buzzer_frequency(440)
+            time.sleep(0.4)
+            l.set_buzzer_frequency(0)
+        except:
+            self.message_box("Error", str(traceback.format_exc()))
+
+    def id_text_modified(self, text):
+        if len(text) == 4:
+            self.ui.pushButton_setid.setEnabled(True)
+        else:
+            self.ui.pushButton_setid.setEnabled(False)
 
 def main():
     app = QtGui.QApplication(sys.argv)
