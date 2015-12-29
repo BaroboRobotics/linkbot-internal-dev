@@ -28,16 +28,18 @@ class StartQT4(QtGui.QMainWindow):
 
         self.connect_preassembly_buttons()
 
-    def reset(self):
+    def preassembly_reset(self):
         try:
             self.ui.stackedWidget.setCurrentIndex(0)
+            self.ui.groupBox_serialId.setEnabled(True)
+            self.ui.groupBox_postassembly.setEnabled(True)
             self.test.exit()
             self.test = None
         except Exception as e:
             print('During preassembly reset:', e)
 
     def connect_preassembly_buttons(self):
-        self.ui.pushButton_preassembly_reset.clicked.connect(self.reset)
+        self.ui.pushButton_preassembly_reset.clicked.connect(self.preassembly_reset)
         self.ui.pushButton_preassembly_start.clicked.connect(self.preassembly_start)
         self.ui.pushButton_preassembly_next1.clicked.connect(self.preassembly_1)
         self.ui.pushButton_preassembly_next2.clicked.connect(self.preassembly_2)
@@ -48,6 +50,8 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.pushButton_preassembly_finish.clicked.connect(self.preassembly_finish)
 
     def preassembly_start(self):
+        self.ui.groupBox_serialId.setEnabled(False)
+        self.ui.groupBox_postassembly.setEnabled(False)
         self.ui.stackedWidget.setCurrentIndex(1)
         self.linkbot = linkbot.Linkbot()
         self.test = preassembly.TestLedRed(self, linkbot=self.linkbot)
@@ -117,7 +121,7 @@ class StartQT4(QtGui.QMainWindow):
 
     def preassembly_finish(self):
         self.ui.stackedWidget.setCurrentIndex(0)
-        self.test.exit()
+        self.preassembly_reset()
 
 def main():
     app = QtGui.QApplication(sys.argv)

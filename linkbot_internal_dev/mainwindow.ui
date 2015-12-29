@@ -469,7 +469,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_2">
+     <widget class="QGroupBox" name="groupBox_serialId">
       <property name="title">
        <string>Serial ID</string>
       </property>
@@ -507,7 +507,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_3">
+     <widget class="QGroupBox" name="groupBox_postassembly">
       <property name="title">
        <string>Postassembly Test</string>
       </property>
