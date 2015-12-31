@@ -333,6 +333,64 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="page_12">
+          <layout class="QVBoxLayout" name="verticalLayout_15">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Encoder Test:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QSlider" name="verticalSlider_1">
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="verticalSlider_2">
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="verticalSlider_3">
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_next_encoder">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Next</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="page_9">
           <layout class="QVBoxLayout" name="verticalLayout_12">
            <item>
@@ -513,7 +571,7 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_diagnostics_status">
          <property name="styleSheet">
           <string notr="true">
 background-color: rgb(0, 0, 255);

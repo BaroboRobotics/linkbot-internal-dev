@@ -101,6 +101,28 @@ class TestAccel(BaseState):
         self.y_changed.emit(y*20)
         self.z_changed.emit(z*20)
 
+class TestEncoders(BaseState):
+    m1_changed = QtCore.pyqtSignal(int)
+    m2_changed = QtCore.pyqtSignal(int)
+    m3_changed = QtCore.pyqtSignal(int)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def enter(self):
+        self.linkbot.enable_encoder_events(2, self.callback)
+
+    def exit(self):
+        self.linkbot.disable_encoder_events()
+
+    def callback(self, n, angle, timestamp):
+        if n == 1:
+            self.m1_changed.emit(angle%360)
+        elif n == 2:
+            self.m2_changed.emit(angle%360)
+        elif n == 3:
+            self.m3_changed.emit(angle%360)
+
 class TestMotorCcw(BaseState):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
