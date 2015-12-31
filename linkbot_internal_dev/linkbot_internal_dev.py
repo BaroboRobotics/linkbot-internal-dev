@@ -2,6 +2,7 @@
 
 __version__ = "0.0.1"
 
+import sqlite3 as sql
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -16,6 +17,7 @@ except:
 
 #import linkbot_diagnostics as diagnostics
 from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
+from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
 from linkbot_diagnostics.testlinkbot import TestLinkbot
 
 import linkbot
@@ -23,9 +25,15 @@ import threading
 import sys
 import time
 import traceback
+import os
+import appdirs
+
+db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
+db_file = os.path.join(db_dir, "database.db")
 
 class StartQT4(QtGui.QMainWindow):
     diagnostics_finished = QtCore.pyqtSignal(int)
+    diagnostics_error = QtCore.pyqtSignal(str, str) # (title, message)
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -46,6 +54,7 @@ class StartQT4(QtGui.QMainWindow):
         self.ui.pushButton_postassembly_start.clicked.connect(
                 self.start_diagnostics)
         self.diagnostics_finished.connect(self.end_diagnostics)
+        self.diagnostics_error.connect(self.message_box)
 
     def message_box(self, title, message):
         QtGui.QMessageBox.information(self, title, message)
@@ -212,40 +221,39 @@ class StartQT4(QtGui.QMainWindow):
 
     def _diagnostics(self):
         try:
-            linkbot = TestLinkbot('LOCL')
-            x,y,z = linkbot.getAccelerometer()
+            l = TestLinkbot('LOCL')
+            x,y,z = l.getAccelerometer()
             if abs(x) > 0.1 or \
                abs(x) > 0.1 or \
                abs(z-1) > 0.1:
-                QtGui.QMessageBox.warning(self, 
-                    "Warning",
-                    "Accelerometer readings have anomalies!")
+                 self.diagnostics_error.emit('Warning',
+                         'Accelerometer readings have anomalies!')
             global db_file
             con = sql.connect(db_file)
             initialize_tables(con.cursor())
             cur = con.cursor()
-# Check to see if this linkbot is in our database already. Add it if not
-            cur.execute('SELECT * FROM robot_type WHERE Id=\'{}\''.format(linkbot.getSerialId()))
+# Check to see if this l is in our database already. Add it if not
+            cur.execute('SELECT * FROM robot_type WHERE Id=\'{}\''.format(l.getSerialId()))
             rows = cur.fetchall()
             formFactor = None
-            if linkbot.getFormFactor() == Linkbot.FormFactor.I:
-                formFactor = "Linkbot-I"
+            if l.getFormFactor() == linkbot.Linkbot.FormFactor.I:
+                formFactor = "linkbot.Linkbot-I"
                 motor2index = 2
-            elif linkbot.getFormFactor() == Linkbot.FormFactor.L:
-                formFactor = "Linkbot-L"
+            elif l.getFormFactor() == linkbot.Linkbot.FormFactor.L:
+                formFactor = "linkbot.Linkbot-L"
                 motor2index = 1
             else:
                 formFactor = "UNKNOWN"
-            print ("Testing LinkBot {}".format(linkbot.getSerialId()))
-            d = LinkbotDiagnostic(linkbot)
+            print ("Testing LinkBot {}".format(l.getSerialId()))
+            d = LinkbotDiagnostic(l)
             results = d.runLinearityTest()
             now = time.strftime('%Y-%m-%d %H:%M:%S')
             if len(rows) == 0:
                 cur.execute('INSERT INTO robot_type VALUES(\'{}\', \'{}\')'.format(
-                    linkbot.getSerialId(), formFactor))
+                    l.getSerialId(), formFactor))
             cur.execute("INSERT INTO linearity_tests "
                 "VALUES('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {})".format(
-                    linkbot.getSerialId(),
+                    l.getSerialId(),
                     now,
                     results[0]['forward_slope'],
                     results[0]['forward_rvalue'],
@@ -258,15 +266,6 @@ class StartQT4(QtGui.QMainWindow):
 
             con.commit()
             con.close()
-            self.ui.m1f.setText(str(results[0]['forward_slope']))
-            self.ui.m1fl.setText(str(results[0]['forward_rvalue']))
-            self.ui.m1b.setText(str(results[0]['backward_slope']))
-            self.ui.m1bl.setText(str(results[0]['backward_rvalue']))
-
-            self.ui.m2f.setText(str(results[motor2index]['forward_slope']))
-            self.ui.m2fl.setText(str(results[motor2index]['forward_rvalue']))
-            self.ui.m2b.setText(str(results[motor2index]['backward_slope']))
-            self.ui.m2bl.setText(str(results[motor2index]['backward_rvalue']))
             speeds = [ 
                         results[0]['forward_slope'],
                         results[0]['backward_slope'],
@@ -287,8 +286,7 @@ class StartQT4(QtGui.QMainWindow):
                 self.diagnostics_finished.emit(1)
 
         except Exception as e:
-            QtGui.QMessageBox.warning(self, 
-                    "Warning",
+            self.diagnostics_error.emit('Warning',
                     "Test Failed: " + str(e))
             self.diagnostics_finished.emit(0)
 
