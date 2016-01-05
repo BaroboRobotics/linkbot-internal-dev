@@ -59,6 +59,7 @@ class StartQT4(QtGui.QMainWindow):
 
         self.tests = [ (tests.Start, None),
                        (tests.SerialId, self.ui.checkBox_serial_id),
+                       (tests.Radio, self.ui.checkBox_radio),
                        (tests.Final, None),
                      ]
 
