@@ -60,6 +60,7 @@ class StartQT4(QtGui.QMainWindow):
         self.tests = [ (tests.Start, None),
                        (tests.SerialId, self.ui.checkBox_serial_id),
                        (tests.Radio, self.ui.checkBox_radio),
+                       (tests.ButtonPwr, None),
                        (tests.Final, None),
                      ]
 
@@ -75,6 +76,7 @@ class StartQT4(QtGui.QMainWindow):
             print('While trying to set checkbox:', e)
 
         if self._test_widget is not None:
+            self._test_widget.deinit()
             self.ui.test_content_layout.removeWidget(self._test_widget)
             self._test_widget.hide()
             del self._test_widget
@@ -96,7 +98,6 @@ class StartQT4(QtGui.QMainWindow):
         self._test_widget.run()
 
     def failure(self, msg):
-        print("fail signal received!")
         self.clear_ui()
         # Load a failure label
         try:
