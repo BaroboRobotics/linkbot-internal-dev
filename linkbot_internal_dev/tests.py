@@ -10,7 +10,7 @@ class LinkbotTest(QtGui.QWidget):
     failure = QtCore.pyqtSignal(str)
     error = QtCore.pyqtSignal(str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, state=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.linkbot = linkbot
         self.error.connect(self.error_message)
@@ -33,14 +33,22 @@ except:
     from forms import start as start_ui
 
 class Start(LinkbotTest):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = start_ui.Ui_Form()
         self.ui.setupUi(self)
         self.ui.pushButton_start.clicked.connect(self.clicked)
+        self.state = state
+
+    def _run(self):
+        self.state.clear()
+        self.state['linkbot'] = linkbot.Linkbot()
+        self.completed.emit()
 
     def clicked(self):
-        self.completed.emit()
+        self.ui.pushButton_start.setEnabled(False)
+        self.thread = threading.Thread(target=self._run)
+        self.thread.start()
 
 try:
     from linkbot_internal_dev.forms import serial_id as serial_id_ui
@@ -48,8 +56,9 @@ except:
     from forms import serial_id as serial_id_ui
 
 class SerialId(LinkbotTest):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
+        self.state = state
         self.ui = serial_id_ui.Ui_Form()
         self.ui.setupUi(self)
         
@@ -69,7 +78,7 @@ class SerialId(LinkbotTest):
                     "Serial ID must be 4 characters in length.")
             return
         try:
-            l = linkbot.Linkbot()
+            l = self.state['linkbot']
             l._setSerialId(self.ui.lineEdit.text().upper())
             l.set_buzzer_frequency(440)
             time.sleep(0.4)
@@ -132,7 +141,7 @@ class Radio(LinkbotTest):
 class ButtonTest(LinkbotTest):
     msg = "Label message"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         vbox = QtGui.QVBoxLayout()
         label = QtGui.QLabel(self.msg)
@@ -142,9 +151,10 @@ class ButtonTest(LinkbotTest):
         label.setFont(font)
         vbox.addWidget(label)
         self.setLayout(vbox)
+        self.state = state
 
     def run(self):
-        self.l = linkbot.Linkbot()
+        self.l = self.state['linkbot']
         self.l.enable_button_events(self.cb)
 
     def deinit(self):
@@ -179,5 +189,21 @@ class ButtonB(ButtonTest):
     def cb(self, buttonNo, buttonState, timestamp):
         if buttonNo == 2:
             self.completed.emit()
+
+class Buzzer(ButtonTest):
+    msg = "Check that the buzzer is buzzing and press any button on the \
+    Linkbot to continue."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.l = linkbot.Linkbot()
+        self.l.enable_button_events(self.cb)
+        self.l.set_buzzer_frequency(440)
+
+    def cb(self, buttonNo, buttonState, timestamp):
+        self.l.set_buzzer_frequency(0)
+        self.completed.emit()
 
 

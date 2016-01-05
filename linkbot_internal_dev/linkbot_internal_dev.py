@@ -63,13 +63,16 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.ButtonPwr, None),
                        (tests.ButtonA, None),
                        (tests.ButtonB, self.ui.checkBox_button),
+                       (tests.Buzzer, self.ui.checkBox_buzzer),
                        (tests.Final, None),
                      ]
+
+        self._test_state = {}
 
         self.reset_ui()
 
         self.ui.pushButton_restart.clicked.connect(self.reset_ui)
-
+        
     def display_next_test(self):
         try:
             if self._test[1] is not None:
@@ -90,7 +93,7 @@ class StartQT4(QtGui.QMainWindow):
             self._tests = iter(self.tests)
             self._test = next(self._tests)
 
-        self._test_widget = self._test[0](self)
+        self._test_widget = self._test[0](self, state=self._test_state)
         self._test_widget.completed.connect(self.display_next_test)
         self._test_widget.failure.connect(self.failure)
         self._test_widget.show()
