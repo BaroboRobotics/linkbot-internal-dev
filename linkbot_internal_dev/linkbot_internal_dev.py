@@ -63,11 +63,9 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.Final, None),
                      ]
 
-        self._tests = iter(self.tests)
-        self._test = None
-        self._test_widget = None
+        self.reset_ui()
 
-        self.display_next_test()
+        self.ui.pushButton_restart.clicked.connect(self.reset_ui)
 
     def display_next_test(self):
         try:
@@ -90,8 +88,50 @@ class StartQT4(QtGui.QMainWindow):
 
         self._test_widget = self._test[0](self)
         self._test_widget.completed.connect(self.display_next_test)
+        self._test_widget.failure.connect(self.failure)
+        self._test_widget.show()
 
         self.ui.test_content_layout.addWidget(self._test_widget)
+
+        self._test_widget.run()
+
+    def failure(self, msg):
+        print("fail signal received!")
+        self.clear_ui()
+        # Load a failure label
+        try:
+            self._test_widget = QtGui.QLabel(msg)
+            self._test_widget.setStyleSheet('background:rgb(255,0,0);')
+            font = self._test_widget.font()
+            font.setPointSize(24)
+            self._test_widget.setFont(font)
+            self._test_widget.setWordWrap(True)
+            self._test_widget.show()
+            self.ui.test_content_layout.addWidget(self._test_widget)
+        except Exception as e:
+            print(traceback.format_exc())
+            return
+
+    def reset_ui(self):
+        self.clear_ui()
+        for b in self.checkboxes:
+            b.setChecked(False)
+
+        self._tests = iter(self.tests)
+        self._test = None
+        self._test_widget = None
+
+        self.display_next_test()
+
+    def clear_ui(self):
+        # Clear the content area
+        try:
+            self.ui.test_content_layout.removeWidget(self._test_widget)
+            self._test_widget.hide()
+            del self._test_widget
+        except Exception as e:
+            print(traceback.format_exc())
+            return
 
     def message_box(self, title, message):
         QtGui.QMessageBox.information(self, title, message)

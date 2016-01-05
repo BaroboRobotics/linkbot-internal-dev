@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Tue Jan  5 11:45:18 2016
+# Created: Tue Jan  5 12:18:23 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,9 +87,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.groupBox_test_content)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.verticalLayout_2.addItem(spacerItem1)
-        self.pushButton = QtGui.QPushButton(self.centralwidget)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.verticalLayout_2.addWidget(self.pushButton)
+        self.pushButton_restart = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_restart.setObjectName(_fromUtf8("pushButton_restart"))
+        self.verticalLayout_2.addWidget(self.pushButton_restart)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -121,7 +121,7 @@ class Ui_MainWindow(object):
         self.checkBox_calibration.setText(_translate("MainWindow", "Calibration", None))
         self.checkBox_motor_test.setText(_translate("MainWindow", "Motor Test", None))
         self.groupBox_test_content.setTitle(_translate("MainWindow", "Test Instructions", None))
-        self.pushButton.setText(_translate("MainWindow", "Restart", None))
+        self.pushButton_restart.setText(_translate("MainWindow", "Restart", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
         self.actionQuit.setText(_translate("MainWindow", "Quit", None))
 
