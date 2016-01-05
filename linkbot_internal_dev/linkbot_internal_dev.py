@@ -40,9 +40,6 @@ class StartQT4(QtGui.QMainWindow):
     diagnostics_finished = QtCore.pyqtSignal(int)
     diagnostics_error = QtCore.pyqtSignal(str, str) # (title, message)
 
-    tests = [ tests.Start, 
-            tests.SerialId, ]
-
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
@@ -50,16 +47,50 @@ class StartQT4(QtGui.QMainWindow):
 
         self.setWindowTitle('Linkbot Testing Suite ' + __version__)
 
+        self.checkboxes = [ self.ui.checkBox_accelerometer,
+                            self.ui.checkBox_button,
+                            self.ui.checkBox_buzzer,
+                            self.ui.checkBox_calibration,
+                            self.ui.checkBox_led,
+                            self.ui.checkBox_motor_test,
+                            self.ui.checkBox_radio,
+                            self.ui.checkBox_serial_id,
+                          ]
+
+        self.tests = [ (tests.Start, None),
+                       (tests.SerialId, self.ui.checkBox_serial_id),
+                       (tests.Final, None),
+                     ]
+
         self._tests = iter(self.tests)
         self._test = None
+        self._test_widget = None
 
         self.display_next_test()
 
     def display_next_test(self):
-        if self._test is not None:
-            self.ui.test_content_layout.removeWidget(self._test)
-        self._test = next(self._tests)
-        self.ui.test_content_layout.addWidget(self._test(self, linkbot=linkbot.Linkbot()))
+        try:
+            if self._test[1] is not None:
+                self._test[1].setChecked(True)
+        except Exception as e:
+            print('While trying to set checkbox:', e)
+
+        if self._test_widget is not None:
+            self.ui.test_content_layout.removeWidget(self._test_widget)
+            self._test_widget.hide()
+            del self._test_widget
+        try:
+            self._test = next(self._tests)
+        except StopIteration:
+            for b in self.checkboxes:
+                b.setChecked(False)
+            self._tests = iter(self.tests)
+            self._test = next(self._tests)
+
+        self._test_widget = self._test[0](self)
+        self._test_widget.completed.connect(self.display_next_test)
+
+        self.ui.test_content_layout.addWidget(self._test_widget)
 
     def message_box(self, title, message):
         QtGui.QMessageBox.information(self, title, message)
