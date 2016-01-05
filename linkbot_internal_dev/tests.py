@@ -187,23 +187,90 @@ class ButtonB(ButtonTest):
         super().__init__(*args, **kwargs)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonNo == 2:
+        if buttonNo == 2 and buttonState == 0:
             self.completed.emit()
 
 class Buzzer(ButtonTest):
-    msg = "Check that the buzzer is buzzing and press any button on the \
+    msg = "Check that the buzzer is buzzing and press any button on the\
     Linkbot to continue."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def run(self):
-        self.l = linkbot.Linkbot()
+        self.l = self.state['linkbot']
         self.l.enable_button_events(self.cb)
         self.l.set_buzzer_frequency(440)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        self.l.set_buzzer_frequency(0)
-        self.completed.emit()
+        if buttonState == 0:
+            self.l.set_buzzer_frequency(0)
+            self.completed.emit()
+
+class LedRed(ButtonTest):
+    msg = """
+    <html> <head/>
+    <body>
+    Make sure the LED is <p style="color:red">RED</p> and press any button on the
+    Linkbot to continue.
+    </body>
+    </html>
+          """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.l = self.state['linkbot']
+        self.l.enable_button_events(self.cb)
+        self.l.set_led_color(255, 0, 0)
+
+    def cb(self, buttonNo, buttonState, timestamp):
+        if buttonState == 0:
+            self.completed.emit()
+
+class LedGreen(ButtonTest):
+    msg = """
+    <html> <head/>
+    <body>
+    Make sure the LED is <p style="color:green">GREEN</p> and press any button on the
+    Linkbot to continue.
+    </body>
+    </html>
+          """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.l = self.state['linkbot']
+        self.l.enable_button_events(self.cb)
+        self.l.set_led_color(0, 255, 0)
+
+    def cb(self, buttonNo, buttonState, timestamp):
+        if buttonState == 0:
+            self.completed.emit()
+
+class LedBlue(ButtonTest):
+    msg = """
+    <html> <head/>
+    <body>
+    Make sure the LED is <p style="color:blue">BLUE</p> and press any button on the
+    Linkbot to continue.
+    </body>
+    </html>
+          """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.l = self.state['linkbot']
+        self.l.enable_button_events(self.cb)
+        self.l.set_led_color(0, 0, 255)
+
+    def cb(self, buttonNo, buttonState, timestamp):
+        if buttonState == 0:
+            self.completed.emit()
 
 

@@ -64,6 +64,9 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.ButtonA, None),
                        (tests.ButtonB, self.ui.checkBox_button),
                        (tests.Buzzer, self.ui.checkBox_buzzer),
+                       (tests.LedRed, None),
+                       (tests.LedGreen, None),
+                       (tests.LedBlue, self.ui.checkBox_led),
                        (tests.Final, None),
                      ]
 
