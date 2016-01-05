@@ -67,6 +67,9 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.LedRed, None),
                        (tests.LedGreen, None),
                        (tests.LedBlue, self.ui.checkBox_led),
+                       (tests.AccelerometerZ, None),
+                       (tests.AccelerometerY, None),
+                       (tests.AccelerometerX, self.ui.checkBox_accelerometer),
                        (tests.Final, None),
                      ]
 

@@ -273,4 +273,62 @@ class LedBlue(ButtonTest):
         if buttonState == 0:
             self.completed.emit()
 
+class AccelerometerTest(ButtonTest):
+    msg = "Label message"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.l = self.state['linkbot']
+        self.l.enable_accelerometer_events(self.cb)
+        x,y,z = self.l.get_accelerometer_data()
+        self.cb(x,y,z,0)
+
+    def deinit(self):
+        self.l.disable_accelerometer_events()
+
+    def cb(self, x, y, z, timestamp):
+        pass
+
+class AccelerometerZ(AccelerometerTest):
+    msg = """
+        Place the robot on a level surface with the buttons pointing upward.
+        """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def cb(self, x, y, z, timestamp):
+        if abs(z-1) < 0.1 and \
+           abs(x) < 0.1 and \
+           abs(y) < 0.1:
+           self.completed.emit()
+
+class AccelerometerY(AccelerometerTest):
+    msg = """
+        Place the robot on a level surface with face 2 pointing down.
+        """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def cb(self, x, y, z, timestamp):
+        if abs(y-1) < 0.1 and \
+           abs(z) < 0.1 and \
+           abs(x) < 0.1:
+           self.completed.emit()
+
+class AccelerometerX(AccelerometerTest):
+    msg = """
+        Place the robot on a level surface with face 1 pointing down.
+        """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def cb(self, x, y, z, timestamp):
+        if abs(x-1) < 0.1 and \
+           abs(z) < 0.1 and \
+           abs(y) < 0.1:
+           self.completed.emit()
+
+
 
