@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Tue Jan  5 12:18:23 2016
+# Created: Wed Jan  6 14:41:26 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,10 +39,6 @@ class Ui_MainWindow(object):
         self.checkBox_serial_id.setCheckable(True)
         self.checkBox_serial_id.setObjectName(_fromUtf8("checkBox_serial_id"))
         self.verticalLayout.addWidget(self.checkBox_serial_id)
-        self.checkBox_radio = QtGui.QCheckBox(self.groupBox)
-        self.checkBox_radio.setCheckable(True)
-        self.checkBox_radio.setObjectName(_fromUtf8("checkBox_radio"))
-        self.verticalLayout.addWidget(self.checkBox_radio)
         self.checkBox_button = QtGui.QCheckBox(self.groupBox)
         self.checkBox_button.setCheckable(True)
         self.checkBox_button.setObjectName(_fromUtf8("checkBox_button"))
@@ -63,6 +59,10 @@ class Ui_MainWindow(object):
         self.checkBox_calibration.setCheckable(True)
         self.checkBox_calibration.setObjectName(_fromUtf8("checkBox_calibration"))
         self.verticalLayout.addWidget(self.checkBox_calibration)
+        self.checkBox_radio = QtGui.QCheckBox(self.groupBox)
+        self.checkBox_radio.setCheckable(True)
+        self.checkBox_radio.setObjectName(_fromUtf8("checkBox_radio"))
+        self.verticalLayout.addWidget(self.checkBox_radio)
         self.checkBox_motor_test = QtGui.QCheckBox(self.groupBox)
         self.checkBox_motor_test.setCheckable(True)
         self.checkBox_motor_test.setObjectName(_fromUtf8("checkBox_motor_test"))
@@ -113,12 +113,12 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.groupBox.setTitle(_translate("MainWindow", "Checklist", None))
         self.checkBox_serial_id.setText(_translate("MainWindow", "Serial ID Programmed", None))
-        self.checkBox_radio.setText(_translate("MainWindow", "Radio Test", None))
         self.checkBox_button.setText(_translate("MainWindow", "Button Test", None))
         self.checkBox_buzzer.setText(_translate("MainWindow", "Buzzer Test", None))
         self.checkBox_led.setText(_translate("MainWindow", "LED Color Test", None))
         self.checkBox_accelerometer.setText(_translate("MainWindow", "Accelerometer Test", None))
         self.checkBox_calibration.setText(_translate("MainWindow", "Calibration", None))
+        self.checkBox_radio.setText(_translate("MainWindow", "Radio Test", None))
         self.checkBox_motor_test.setText(_translate("MainWindow", "Motor Test", None))
         self.groupBox_test_content.setTitle(_translate("MainWindow", "Test Instructions", None))
         self.pushButton_restart.setText(_translate("MainWindow", "Restart", None))

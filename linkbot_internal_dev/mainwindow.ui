@@ -32,16 +32,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox_radio">
-         <property name="text">
-          <string>Radio Test</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="checkBox_button">
          <property name="text">
           <string>Button Test</string>
@@ -85,6 +75,16 @@
         <widget class="QCheckBox" name="checkBox_calibration">
          <property name="text">
           <string>Calibration</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_radio">
+         <property name="text">
+          <string>Radio Test</string>
          </property>
          <property name="checkable">
           <bool>true</bool>

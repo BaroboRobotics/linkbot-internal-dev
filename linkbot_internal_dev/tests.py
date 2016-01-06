@@ -41,9 +41,12 @@ class Start(LinkbotTest):
         self.state = state
 
     def _run(self):
-        self.state.clear()
-        self.state['linkbot'] = linkbot.Linkbot()
-        self.completed.emit()
+        try:
+            self.state.clear()
+            self.state['linkbot'] = linkbot.Linkbot()
+            self.completed.emit()
+        except:
+            self.ui.pushButton_start.setEnabled(True)
 
     def clicked(self):
         self.ui.pushButton_start.setEnabled(False)
@@ -192,7 +195,7 @@ class ButtonB(ButtonTest):
 
 class Buzzer(ButtonTest):
     msg = "Check that the buzzer is buzzing and press any button on the\
-    Linkbot to continue."
+ Linkbot to continue."
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -293,7 +296,7 @@ class AccelerometerTest(ButtonTest):
 
 class AccelerometerZ(AccelerometerTest):
     msg = """
-        Place the robot on a level surface with the buttons pointing upward.
+Place the robot on a level surface with the buttons pointing upward.
         """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -306,7 +309,7 @@ class AccelerometerZ(AccelerometerTest):
 
 class AccelerometerY(AccelerometerTest):
     msg = """
-        Place the robot on a level surface with face 2 pointing down.
+Place the robot on a level surface with face 2 pointing down.
         """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -319,12 +322,13 @@ class AccelerometerY(AccelerometerTest):
 
 class AccelerometerX(AccelerometerTest):
     msg = """
-        Place the robot on a level surface with face 1 pointing down.
+Place the robot on a level surface with face 1 pointing down.
         """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def cb(self, x, y, z, timestamp):
+        print(x, y, z)
         if abs(x-1) < 0.1 and \
            abs(z) < 0.1 and \
            abs(y) < 0.1:
@@ -371,8 +375,10 @@ class Calibration(ButtonTest):
                 print(angles)
             except:
                 num_failures += 1
+                time.sleep(1)
                 if num_failures > 10:
                     raise
+                continue
             if all( map( lambda x: abs(x) < 2, angles) ):
                 i += 1
             else:
@@ -394,4 +400,100 @@ class Calibration(ButtonTest):
         self.thread_cond.notify()
         self.thread_cond.release()
         self.thread.join()
+
+try:
+    from linkbot_internal_dev.forms import motor as motor_ui
+except:
+    from forms import motor as motor_ui
+
+#import linkbot_diagnostics as diagnostics
+from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
+from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
+from linkbot_diagnostics.testlinkbot import TestLinkbot
+import sqlite3 as sql
+import appdirs
+import os
+
+db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
+db_file = os.path.join(db_dir, "database.db")
+
+class MotorTest(LinkbotTest):
+    def __init__(self, *args, state={}, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ui = motor_ui.Ui_Form()
+        self.ui.setupUi(self)
+        self.state = state
+    
+    def run(self):
+        self.thread = threading.Thread(target=self._diagnostics)
+        self.thread.start()
+
+    def _diagnostics(self):
+        try:
+            l = TestLinkbot('LOCL')
+            x,y,z = l.getAccelerometer()
+            if abs(x) > 0.1 or \
+               abs(x) > 0.1 or \
+               abs(z-1) > 0.1:
+                 self.diagnostics_error.emit('Warning',
+                         'Accelerometer readings have anomalies!')
+            global db_file
+            con = sql.connect(db_file)
+            initialize_tables(con.cursor())
+            cur = con.cursor()
+# Check to see if this l is in our database already. Add it if not
+            cur.execute('SELECT * FROM robot_type WHERE Id=\'{}\''.format(l.getSerialId()))
+            rows = cur.fetchall()
+            formFactor = None
+            if l.getFormFactor() == linkbot.Linkbot.FormFactor.I:
+                formFactor = "linkbot.Linkbot-I"
+                motor2index = 2
+            elif l.getFormFactor() == linkbot.Linkbot.FormFactor.L:
+                formFactor = "linkbot.Linkbot-L"
+                motor2index = 1
+            else:
+                formFactor = "UNKNOWN"
+            print ("Testing LinkBot {}".format(l.getSerialId()))
+            d = LinkbotDiagnostic(l)
+            results = d.runLinearityTest()
+            now = time.strftime('%Y-%m-%d %H:%M:%S')
+            if len(rows) == 0:
+                cur.execute('INSERT INTO robot_type VALUES(\'{}\', \'{}\')'.format(
+                    l.getSerialId(), formFactor))
+            cur.execute("INSERT INTO linearity_tests "
+                "VALUES('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {})".format(
+                    l.getSerialId(),
+                    now,
+                    results[0]['forward_slope'],
+                    results[0]['forward_rvalue'],
+                    results[0]['backward_slope'],
+                    results[0]['backward_rvalue'],
+                    results[motor2index]['forward_slope'],
+                    results[motor2index]['forward_rvalue'],
+                    results[motor2index]['backward_slope'],
+                    results[motor2index]['backward_rvalue']))
+
+            con.commit()
+            con.close()
+            speeds = [ 
+                        results[0]['forward_slope'],
+                        results[0]['backward_slope'],
+                        results[motor2index]['forward_slope'],
+                        results[motor2index]['backward_slope'],
+                     ]
+            linearities = [
+                results[0]['forward_rvalue'],
+                results[0]['backward_rvalue'],
+                results[motor2index]['forward_rvalue'],
+                results[motor2index]['backward_rvalue'],
+                          ]
+            if any(abs(x) < 210 for x in speeds):
+                self.failure.emit('Motor speed too slow.')
+            elif any(x < 0.93 for x in linearities):
+                self.failure.emit('Motor linearity failure.')
+            else:
+                self.completed.emit()
+
+        except Exception as e:
+            self.failure.emit("Test Failed: " + str(e))
 
