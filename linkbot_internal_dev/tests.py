@@ -150,7 +150,7 @@ class ButtonTest(LinkbotTest):
         label = QtGui.QLabel(self.msg, self)
         label.setWordWrap(True)
         font = label.font()
-        font.setPointSize(24)
+        font.setPointSize(16)
         label.setFont(font)
         vbox.addWidget(label)
         self.setLayout(vbox)
