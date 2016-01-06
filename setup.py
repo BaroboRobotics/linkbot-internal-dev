@@ -3,11 +3,15 @@
 from setuptools import setup
 import re
 
-version = '1.0.0'
+version = re.search(
+    '^__version__\s*=\s*"(.*)"',
+    open('linkbot_internal_dev/linkbot_internal_dev.py').read(),
+    re.M
+    ).group(1)
 
 setup(
     name = "linkbot_internal_dev",
-    packages = ["linkbot_internal_dev", ],
+    packages = ["linkbot_internal_dev", "linkbot_internal_dev.forms"],
     version = version,
     entry_points = {
         "console_scripts":
