@@ -143,8 +143,8 @@ class ButtonTest(LinkbotTest):
 
     def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
-        vbox = QtGui.QVBoxLayout()
-        label = QtGui.QLabel(self.msg)
+        vbox = QtGui.QVBoxLayout(self)
+        label = QtGui.QLabel(self.msg, self)
         label.setWordWrap(True)
         font = label.font()
         font.setPointSize(24)
@@ -330,5 +330,68 @@ class AccelerometerX(AccelerometerTest):
            abs(y) < 0.1:
            self.completed.emit()
 
+class Calibration(ButtonTest):
+    msg = """
+    <html> <head/>
+    <body>
+    <ol>
+    <li> Move both motors to their zero positions.
+    <li> Press and hold the A and B buttons until the motors start spinning.
+    <li> Set the robot down for the remainder of the test.
+    </body>
+    </html>
+          """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.thread_cond = threading.Condition()
+        self._running = False
+
+    def run(self):
+        self.l = self.state['linkbot']
+        self._running = True
+        self.thread = threading.Thread(target=self._run)
+        self.thread.start()
+
+    def _run(self):
+        # First, wait 10 seconds
+        self.thread_cond.acquire()
+        self.thread_cond.wait(10)
+        if not self._running:
+            self.thread_cond.release()
+            return
+        self.thread_cond.release()
+        # Now, wait until the motors have been settled at 0 position for 3
+        # seconds
+        i = 0
+        num_failures = 0
+        while True:
+            try:
+                angles = self.l.get_joint_angles()
+                print(angles)
+            except:
+                num_failures += 1
+                if num_failures > 10:
+                    raise
+            if all( map( lambda x: abs(x) < 2, angles) ):
+                i += 1
+            else:
+                i = 0
+            if i > 5:
+                break
+            self.thread_cond.acquire()
+            self.thread_cond.wait(0.5)
+            if not self._running:
+                self.thread_cond.release()
+                return
+            self.thread_cond.release()
+
+        self.completed.emit()
+            
+    def deinit(self):
+        self.thread_cond.acquire()
+        self._running = False
+        self.thread_cond.notify()
+        self.thread_cond.release()
+        self.thread.join()
 

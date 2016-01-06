@@ -70,6 +70,7 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.AccelerometerZ, None),
                        (tests.AccelerometerY, None),
                        (tests.AccelerometerX, self.ui.checkBox_accelerometer),
+                       (tests.Calibration, self.ui.checkBox_calibration),
                        (tests.Final, None),
                      ]
 
@@ -138,6 +139,7 @@ class StartQT4(QtGui.QMainWindow):
     def clear_ui(self):
         # Clear the content area
         try:
+            self._test_widget.deinit()
             self.ui.test_content_layout.removeWidget(self._test_widget)
             self._test_widget.hide()
             del self._test_widget
