@@ -220,6 +220,8 @@ class ButtonTest(LinkbotTest):
     msg = "Label message"
     fontsize = 24
     pixmap = None
+    pixmap_width = 200
+    pixmap_height = 200 
 
     def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
@@ -228,7 +230,9 @@ class ButtonTest(LinkbotTest):
             image = QtGui.QLabel(self)
             image.setText(_fromUtf8(""))
             pixmap = QtGui.QPixmap(_fromUtf8(self.pixmap))
-            pixmap_scaled = pixmap.scaled(200, 200, QtCore.Qt.KeepAspectRatio)
+            pixmap_scaled = pixmap.scaled( self.pixmap_width, 
+                                           self.pixmap_height, 
+                                           QtCore.Qt.KeepAspectRatio)
             image.setPixmap(pixmap_scaled)
             image.setScaledContents(False)
             image.setAlignment(QtCore.Qt.AlignCenter)
@@ -501,6 +505,7 @@ class Calibration(ButtonTest):
     </body>
     </html>
           """
+    pixmap_width=300
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
