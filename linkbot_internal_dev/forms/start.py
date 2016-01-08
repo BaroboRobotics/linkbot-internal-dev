@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'start.ui'
 #
-# Created: Wed Jan  6 15:26:31 2016
+# Created: Thu Jan  7 15:36:16 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -29,23 +29,18 @@ class Ui_Form(object):
         Form.resize(320, 240)
         self.verticalLayout = QtGui.QVBoxLayout(Form)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.pushButton_start = QtGui.QPushButton(Form)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.pushButton_start.sizePolicy().hasHeightForWidth())
-        self.pushButton_start.setSizePolicy(sizePolicy)
+        self.label = QtGui.QLabel(Form)
         font = QtGui.QFont()
-        font.setPointSize(72)
-        self.pushButton_start.setFont(font)
-        self.pushButton_start.setStyleSheet(_fromUtf8("background-color: rgb(0, 255, 0);"))
-        self.pushButton_start.setObjectName(_fromUtf8("pushButton_start"))
-        self.verticalLayout.addWidget(self.pushButton_start)
+        font.setPointSize(24)
+        self.label.setFont(font)
+        self.label.setWordWrap(True)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.verticalLayout.addWidget(self.label)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
-        self.pushButton_start.setText(_translate("Form", "Start", None))
+        self.label.setText(_translate("Form", "Turn on a Linkbot and plug it in.", None))
 

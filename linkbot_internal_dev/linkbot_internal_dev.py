@@ -150,6 +150,7 @@ class StartQT4(QtGui.QMainWindow):
 def main():
     app = QtGui.QApplication(sys.argv)
     myapp = StartQT4()
+    app.aboutToQuit.connect(myapp.clear_ui)
     myapp.show()
     sys.exit(app.exec_())
 

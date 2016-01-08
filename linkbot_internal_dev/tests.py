@@ -4,6 +4,13 @@ import time
 import linkbot
 import traceback
 import threading
+import math
+
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
 
 class LinkbotTest(QtGui.QWidget):
     completed = QtCore.pyqtSignal()
@@ -37,21 +44,27 @@ class Start(LinkbotTest):
         super().__init__(*args, **kwargs)
         self.ui = start_ui.Ui_Form()
         self.ui.setupUi(self)
-        self.ui.pushButton_start.clicked.connect(self.clicked)
         self.state = state
 
-    def _run(self):
-        try:
-            self.state.clear()
-            self.state['linkbot'] = linkbot.Linkbot()
-            self.completed.emit()
-        except:
-            self.ui.pushButton_start.setEnabled(True)
-
-    def clicked(self):
-        self.ui.pushButton_start.setEnabled(False)
+    def run(self):
         self.thread = threading.Thread(target=self._run)
         self.thread.start()
+        pass
+
+    def _run(self):
+        while True:
+            try:
+                l = linkbot.Linkbot()
+                self.state.clear()
+                self.state['linkbot'] = l
+                break
+            except RuntimeError:
+                time.sleep(0.5)
+                continue
+            except Exception:
+                print(traceback.format_exc())
+                break
+        self.completed.emit()
 
 try:
     from linkbot_internal_dev.forms import serial_id as serial_id_ui
@@ -97,16 +110,40 @@ except:
     from forms import final as final_ui
 
 class Final(LinkbotTest):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = final_ui.Ui_Form()
         self.ui.setupUi(self)
+        self.state = state
+        self.populate()
 
-        self.ui.pushButton.clicked.connect(self.clicked)
+    def run(self):
+        self._lock = threading.Lock()
+        self._running = True
+        self._thread = threading.Thread(target = self._run)
+        self._thread.start()
 
-    def clicked(self):
-        # TODO: Save data to database here
-        self.completed.emit()
+    def _run(self):
+        while True:
+            self._lock.acquire()
+            if not self._running:
+                break
+            self._lock.release()
+            try:
+                self.state['linkbot'].get_joint_angles()
+            except RuntimeError:
+                # The linkbot has been unplugged. Emit the completion signal.
+                self.completed.emit()
+                break
+
+    def deinit(self):
+        self._lock.acquire()
+        self._running = False
+        self._lock.release()
+        self._thread.join()
+
+    def populate(self):
+        self.ui.lineEdit_m1fs.setText(str(self.state['speeds'][0])[0:6])
 
 try:
     from linkbot_internal_dev.forms import radio as radio_ui
@@ -143,16 +180,31 @@ class Radio(LinkbotTest):
 
 class ButtonTest(LinkbotTest):
     msg = "Label message"
+    fontsize = 24
+    pixmap = None
 
     def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         vbox = QtGui.QVBoxLayout(self)
+        if self.pixmap:
+            image = QtGui.QLabel(self)
+            image.setText(_fromUtf8(""))
+            pixmap = QtGui.QPixmap(_fromUtf8(self.pixmap))
+            pixmap_scaled = pixmap.scaled(200, 200, QtCore.Qt.KeepAspectRatio)
+            image.setPixmap(pixmap_scaled)
+            image.setScaledContents(False)
+            image.setGeometry(1, 1, 100, 150)
+            image.setAlignment(QtCore.Qt.AlignCenter)
+            image.show()
+            vbox.addWidget(image)
+
         label = QtGui.QLabel(self.msg, self)
         label.setWordWrap(True)
         font = label.font()
-        font.setPointSize(16)
+        font.setPointSize(self.fontsize)
         label.setFont(font)
         vbox.addWidget(label)
+
         self.setLayout(vbox)
         self.state = state
 
@@ -164,27 +216,30 @@ class ButtonTest(LinkbotTest):
         self.l.disable_button_events()
 
 class ButtonPwr(ButtonTest):
-    msg = "Press the POWER button to continue."
+    msg = "Press the POWER button."
+    pixmap = ":/images/images/button_pwr.png"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonNo == 0:
+        if buttonNo == 0 and buttonState == 0:
             self.completed.emit()
 
 class ButtonA(ButtonTest):
-    msg = "Press the 'A' button to continue."
+    msg = "Press the 'A' button."
+    pixmap = ":/images/images/button_a.png"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonNo == 1:
+        if buttonNo == 1 and buttonState == 0:
             self.completed.emit()
 
 class ButtonB(ButtonTest):
-    msg = "Press the 'B' button to continue."
+    msg = "Press the 'B' button."
+    pixmap = ":/images/images/button_b.png"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -194,28 +249,58 @@ class ButtonB(ButtonTest):
             self.completed.emit()
 
 class Buzzer(ButtonTest):
-    msg = "Check that the buzzer is buzzing and press any button on the\
- Linkbot to continue."
+    msg = "Can you hear the buzzer?\n\n" \
+          "No : A\n" \
+          "Yes : B\n"
+    pixmap = ":/images/images/sine.png"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def run(self):
         self.l = self.state['linkbot']
+        self._running = True
+        self._lock = threading.Lock()
+        self._thread = threading.Thread(target=self._run)
+        self._thread.start()
         self.l.enable_button_events(self.cb)
-        self.l.set_buzzer_frequency(440)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonState == 0:
-            self.l.set_buzzer_frequency(0)
+        if buttonState != 0:
+            return
+        if buttonNo == 0:
+            return
+
+        self._lock.acquire()
+        self._running = False
+        self._lock.release()
+        self._thread.join()
+        self.l.set_buzzer_frequency(0)
+        if buttonNo == 1:
+            # failure
+            self.failure.emit("Tester indicated buzzer failure.")
+        elif buttonNo == 2:
+            # success
             self.completed.emit()
+
+    def _run(self):
+        while True:
+            self._lock.acquire()
+            if not self._running:
+                self._lock.release()
+                break
+            self._lock.release()
+            f = 50+440+ 440*math.sin(time.time())
+            self.l.set_buzzer_frequency(int(f))
+        self.l.set_buzzer_frequency(0)
 
 class LedRed(ButtonTest):
     msg = """
     <html> <head/>
     <body>
-    Make sure the LED is <p style="color:red">RED</p> and press any button on the
-    Linkbot to continue.
+    Is the LED <span style="color:red">RED</span>? 
+    <p> No: A </p>
+    <p> Yes: B </p>
     </body>
     </html>
           """
@@ -236,8 +321,9 @@ class LedGreen(ButtonTest):
     msg = """
     <html> <head/>
     <body>
-    Make sure the LED is <p style="color:green">GREEN</p> and press any button on the
-    Linkbot to continue.
+    Is the LED <span style="color:green">GREEN</span>? 
+    <p> No: A </p>
+    <p> Yes: B </p>
     </body>
     </html>
           """
@@ -258,8 +344,9 @@ class LedBlue(ButtonTest):
     msg = """
     <html> <head/>
     <body>
-    Make sure the LED is <p style="color:blue">BLUE</p> and press any button on the
-    Linkbot to continue.
+    Is the LED <span style="color:blue">BLUE</span>? 
+    <p> No: A </p>
+    <p> Yes: B </p>
     </body>
     </html>
           """
@@ -487,6 +574,8 @@ class MotorTest(LinkbotTest):
                 results[motor2index]['forward_rvalue'],
                 results[motor2index]['backward_rvalue'],
                           ]
+            self.state['speeds'] = speeds 
+            self.state['linearities'] = linearities
             if any(abs(x) < 210 for x in speeds):
                 self.failure.emit('Motor speed too slow.')
             elif any(x < 0.93 for x in linearities):
@@ -496,4 +585,9 @@ class MotorTest(LinkbotTest):
 
         except Exception as e:
             self.failure.emit("Test Failed: " + str(e))
+
+try:
+    from linkbot_internal_dev.forms import images_rc
+except:
+    from forms import images_rc
 

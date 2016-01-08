@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/accel_x.png</file>
+        <file>images/accel_y.png</file>
+        <file>images/accel_z.png</file>
+        <file>images/button_a.png</file>
+        <file>images/button_b.png</file>
+        <file>images/button_pwr.png</file>
+        <file>images/calibrate.png</file>
+        <file>images/sine.png</file>
+    </qresource>
+</RCC>
