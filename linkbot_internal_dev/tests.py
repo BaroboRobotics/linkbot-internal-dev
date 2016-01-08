@@ -452,6 +452,8 @@ Place the robot on a level surface with face 1 pointing down.  """
            self.completed.emit()
 
 class Calibration(ButtonTest):
+    pixmap=":/images/images/calibrate.png"
+    fontsize=12
     msg = """
     <html> <head/>
     <body>
