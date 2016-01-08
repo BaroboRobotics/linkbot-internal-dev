@@ -249,9 +249,10 @@ class ButtonB(ButtonTest):
             self.completed.emit()
 
 class Buzzer(ButtonTest):
-    msg = "Can you hear the buzzer?\n\n" \
+    fontsize=16
+    msg = "Can you hear the buzzer?\n" \
           "No : A\n" \
-          "Yes : B\n"
+          "Yes : B"
     pixmap = ":/images/images/sine.png"
 
     def __init__(self, *args, **kwargs):
@@ -314,7 +315,16 @@ class LedRed(ButtonTest):
         self.l.set_led_color(255, 0, 0)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonState == 0:
+        if buttonState != 0:
+            return
+        if buttonNo == 0:
+            return
+
+        if buttonNo == 1:
+            # failure
+            self.failure.emit("Tester indicated LED failure.")
+        elif buttonNo == 2:
+            # success
             self.completed.emit()
 
 class LedGreen(ButtonTest):
@@ -337,7 +347,16 @@ class LedGreen(ButtonTest):
         self.l.set_led_color(0, 255, 0)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonState == 0:
+        if buttonState != 0:
+            return
+        if buttonNo == 0:
+            return
+
+        if buttonNo == 1:
+            # failure
+            self.failure.emit("Tester indicated LED failure.")
+        elif buttonNo == 2:
+            # success
             self.completed.emit()
 
 class LedBlue(ButtonTest):
@@ -360,10 +379,21 @@ class LedBlue(ButtonTest):
         self.l.set_led_color(0, 0, 255)
 
     def cb(self, buttonNo, buttonState, timestamp):
-        if buttonState == 0:
+        if buttonState != 0:
+            return
+        if buttonNo == 0:
+            return
+
+        if buttonNo == 1:
+            # failure
+            self.failure.emit("Tester indicated LED failure.")
+        elif buttonNo == 2:
+            # success
             self.completed.emit()
 
+
 class AccelerometerTest(ButtonTest):
+    fontsize = 16
     msg = "Label message"
 
     def __init__(self, *args, **kwargs):
@@ -383,8 +413,8 @@ class AccelerometerTest(ButtonTest):
 
 class AccelerometerZ(AccelerometerTest):
     msg = """
-Place the robot on a level surface with the buttons pointing upward.
-        """
+Place the robot on a level surface with the buttons pointing upward.  """
+    pixmap = ":/images/images/accel_z.png"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -396,8 +426,8 @@ Place the robot on a level surface with the buttons pointing upward.
 
 class AccelerometerY(AccelerometerTest):
     msg = """
-Place the robot on a level surface with face 2 pointing down.
-        """
+Place the robot on a level surface with face 2 pointing down.  """
+    pixmap = ":/images/images/accel_y.png"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -409,8 +439,8 @@ Place the robot on a level surface with face 2 pointing down.
 
 class AccelerometerX(AccelerometerTest):
     msg = """
-Place the robot on a level surface with face 1 pointing down.
-        """
+Place the robot on a level surface with face 1 pointing down.  """
+    pixmap = ":/images/images/accel_x.png"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
