@@ -47,12 +47,26 @@ class Start(LinkbotTest):
         self.state = state
 
     def run(self):
+        self._running = True
+        self._lock = threading.Lock()
         self.thread = threading.Thread(target=self._run)
         self.thread.start()
         pass
 
+    def deinit(self):
+        self._lock.acquire()
+        self._running = False
+        self._lock.release()
+        self.thread.join()
+
     def _run(self):
         while True:
+            self._lock.acquire()
+            if not self._running:
+                self._lock.release()
+                break
+            self._lock.release()
+
             try:
                 l = linkbot.Linkbot()
                 self.state.clear()
@@ -110,6 +124,8 @@ except:
     from forms import final as final_ui
 
 class Final(LinkbotTest):
+    speed_threshold = 215
+    linearity_threshold = 0.95
     def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = final_ui.Ui_Form()
@@ -143,7 +159,29 @@ class Final(LinkbotTest):
         self._thread.join()
 
     def populate(self):
-        self.ui.lineEdit_m1fs.setText(str(self.state['speeds'][0])[0:6])
+        self._set_speed_edit(self.ui.lineEdit_m1fs, self.state['speeds'][0])
+        self._set_speed_edit(self.ui.lineEdit_m1bs, self.state['speeds'][1])
+        self._set_speed_edit(self.ui.lineEdit_m2fs, self.state['speeds'][2])
+        self._set_speed_edit(self.ui.lineEdit_m2bs, self.state['speeds'][3])
+
+        self._set_lin_edit(self.ui.lineEdit_m1fl, self.state['linearities'][0])
+        self._set_lin_edit(self.ui.lineEdit_m1bl, self.state['linearities'][1])
+        self._set_lin_edit(self.ui.lineEdit_m2fl, self.state['linearities'][2])
+        self._set_lin_edit(self.ui.lineEdit_m2bl, self.state['linearities'][3])
+
+    def _set_speed_edit(self, widget, speed):
+        widget.setText(str(speed)[0:6])
+        if abs(speed) > self.speed_threshold:
+            widget.setStyleSheet('background:rgb(0,255,0);')
+        else:
+            widget.setStyleSheet('background:rgb(255,0,0);')
+
+    def _set_lin_edit(self, widget, linearity):
+        widget.setText(str(linearity)[0:6])
+        if linearity > self.linearity_threshold:
+            widget.setStyleSheet('background:rgb(0,255,0);')
+        else:
+            widget.setStyleSheet('background:rgb(255,0,0);')
 
 try:
     from linkbot_internal_dev.forms import radio as radio_ui
@@ -193,7 +231,6 @@ class ButtonTest(LinkbotTest):
             pixmap_scaled = pixmap.scaled(200, 200, QtCore.Qt.KeepAspectRatio)
             image.setPixmap(pixmap_scaled)
             image.setScaledContents(False)
-            image.setGeometry(1, 1, 100, 150)
             image.setAlignment(QtCore.Qt.AlignCenter)
             image.show()
             vbox.addWidget(image)
@@ -608,12 +645,7 @@ class MotorTest(LinkbotTest):
                           ]
             self.state['speeds'] = speeds 
             self.state['linearities'] = linearities
-            if any(abs(x) < 210 for x in speeds):
-                self.failure.emit('Motor speed too slow.')
-            elif any(x < 0.93 for x in linearities):
-                self.failure.emit('Motor linearity failure.')
-            else:
-                self.completed.emit()
+            self.completed.emit()
 
         except Exception as e:
             self.failure.emit("Test Failed: " + str(e))
@@ -623,3 +655,45 @@ try:
 except:
     from forms import images_rc
 
+class Failure(LinkbotTest):
+    fontsize = 20
+    def __init__(self, *args, state = None, msg=None, **kwargs):
+        LinkbotTest.__init__(self, *args, **kwargs)
+        self.state = state
+        
+        vbox = QtGui.QVBoxLayout(self)
+        label = QtGui.QLabel(msg, self)
+        label.setWordWrap(True)
+        font = label.font()
+        font.setPointSize(self.fontsize)
+        label.setFont(font)
+        vbox.addWidget(label)
+        self.setStyleSheet('background:rgb(255, 0, 0);')
+
+        self.setLayout(vbox)
+
+    def run(self):
+        self._lock = threading.Lock()
+        self._running = True
+        self._thread = threading.Thread(target = self._run)
+        self._thread.start()
+
+    def _run(self):
+        while True:
+            self._lock.acquire()
+            if not self._running:
+                break
+            self._lock.release()
+            try:
+                self.state['linkbot'].get_joint_angles()
+            except RuntimeError:
+                # The linkbot has been unplugged. Emit the completion signal.
+                self.completed.emit()
+                break
+
+    def deinit(self):
+        self._lock.acquire()
+        self._running = False
+        self._lock.release()
+        self._thread.join()
+    
