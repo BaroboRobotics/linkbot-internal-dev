@@ -22,7 +22,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Type the Linkbot's Serial ID into the text box and click &quot;Set ID&quot;, or scan the Linkbot's ID with a barcode scanner.</string>
+      <string>Scan Linkbot barcode.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 from PyQt4 import QtCore, QtGui
 
@@ -107,14 +107,11 @@ class StartQT4(QtGui.QMainWindow):
         self.clear_ui()
         # Load a failure label
         try:
-            self._test_widget = QtGui.QLabel(msg)
-            self._test_widget.setStyleSheet('background:rgb(255,0,0);')
-            font = self._test_widget.font()
-            font.setPointSize(24)
-            self._test_widget.setFont(font)
-            self._test_widget.setWordWrap(True)
+            self._test_widget = tests.Failure(self, state=self._test_state, msg=msg)
             self._test_widget.show()
             self.ui.test_content_layout.addWidget(self._test_widget)
+            self._test_widget.completed.connect(self.reset_ui)
+            self._test_widget.run()
         except Exception as e:
             print(traceback.format_exc())
             return
@@ -150,6 +147,7 @@ class StartQT4(QtGui.QMainWindow):
 def main():
     app = QtGui.QApplication(sys.argv)
     myapp = StartQT4()
+    app.aboutToQuit.connect(myapp.clear_ui)
     myapp.show()
     sys.exit(app.exec_())
 

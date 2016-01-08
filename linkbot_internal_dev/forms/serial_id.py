@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'serial_id.ui'
 #
-# Created: Wed Jan  6 15:26:31 2016
+# Created: Thu Jan  7 15:36:16 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,6 +59,6 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
-        self.label.setText(_translate("Form", "Type the Linkbot\'s Serial ID into the text box and click \"Set ID\", or scan the Linkbot\'s ID with a barcode scanner.", None))
+        self.label.setText(_translate("Form", "Scan Linkbot barcode.", None))
         self.pushButton_set_id.setText(_translate("Form", "Set ID", None))
 
