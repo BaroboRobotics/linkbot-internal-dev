@@ -494,16 +494,10 @@ Place the robot on a level surface with face 1 pointing down.  """
 
 class Calibration(ButtonTest):
     pixmap=":/images/images/calibrate.png"
-    fontsize=12
-    msg = """
-    <html> <head/>
-    <body>
-    <ol>
-    <li> Move both motors to their zero positions.
-    <li> Press and hold the A and B buttons until the motors start spinning.
-    <li> Set the robot down for the remainder of the test.
-    </body>
-    </html>
+    fontsize=16
+    msg = """\
+Move motors to zero position. 
+Press and hold A and B.
           """
     pixmap_width=300
 
