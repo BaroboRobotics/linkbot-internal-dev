@@ -6,6 +6,16 @@ import traceback
 import threading
 import math
 
+from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
+from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
+from linkbot_diagnostics.testlinkbot import TestLinkbot
+import sqlite3 as sql
+import appdirs
+import os
+
+db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
+db_file = os.path.join(db_dir, "database.db")
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -47,11 +57,26 @@ class Start(LinkbotTest):
         self.state = state
 
     def run(self):
+        self.display_db_data()
         self._running = True
         self._lock = threading.Lock()
         self.thread = threading.Thread(target=self._run)
         self.thread.start()
         pass
+
+    def display_db_data(self):
+        try:
+            global db_file
+            con = sql.connect(db_file)
+            cur = con.cursor()
+            cur.execute('''\
+    SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
+                time.strftime('%Y-%m-%d 00:00:00') ) )
+            rows = cur.fetchall()
+            con.close()
+            self.ui.lineEdit.setText(str(len(rows)))
+        except:
+            print(traceback.format_exc())
 
     def deinit(self):
         self._lock.acquire()
@@ -567,17 +592,6 @@ try:
     from linkbot_internal_dev.forms import motor as motor_ui
 except:
     from forms import motor as motor_ui
-
-#import linkbot_diagnostics as diagnostics
-from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
-from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
-from linkbot_diagnostics.testlinkbot import TestLinkbot
-import sqlite3 as sql
-import appdirs
-import os
-
-db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
-db_file = os.path.join(db_dir, "database.db")
 
 class MotorTest(LinkbotTest):
     def __init__(self, *args, state={}, **kwargs):
