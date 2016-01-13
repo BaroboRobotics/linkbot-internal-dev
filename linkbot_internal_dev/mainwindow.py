@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created: Fri Jan  8 15:06:50 2016
+# Created: Wed Jan 13 12:25:58 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -112,11 +112,11 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.groupBox.setTitle(_translate("MainWindow", "Checklist", None))
-        self.checkBox_serial_id.setText(_translate("MainWindow", "Serial ID Programmed", None))
-        self.checkBox_button.setText(_translate("MainWindow", "Button Test", None))
-        self.checkBox_buzzer.setText(_translate("MainWindow", "Buzzer Test", None))
-        self.checkBox_led.setText(_translate("MainWindow", "LED Color Test", None))
-        self.checkBox_accelerometer.setText(_translate("MainWindow", "Accelerometer Test", None))
+        self.checkBox_serial_id.setText(_translate("MainWindow", "Serial ID", None))
+        self.checkBox_button.setText(_translate("MainWindow", "Buttons", None))
+        self.checkBox_buzzer.setText(_translate("MainWindow", "Buzzer", None))
+        self.checkBox_led.setText(_translate("MainWindow", "LED Color", None))
+        self.checkBox_accelerometer.setText(_translate("MainWindow", "Accelerometer", None))
         self.checkBox_calibration.setText(_translate("MainWindow", "Calibration", None))
         self.checkBox_radio.setText(_translate("MainWindow", "Radio Test", None))
         self.checkBox_motor_test.setText(_translate("MainWindow", "Motor Test", None))

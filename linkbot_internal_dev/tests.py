@@ -170,14 +170,15 @@ class Final(LinkbotTest):
         self._set_lin_edit(self.ui.lineEdit_m2bl, self.state['linearities'][3])
 
     def _set_speed_edit(self, widget, speed):
-        widget.setText(str(speed)[0:6])
+        widget.setText('{} [>{}]'.format(str(speed)[0:6], self.speed_threshold))
         if abs(speed) > self.speed_threshold:
             widget.setStyleSheet('background:rgb(0,255,0);')
         else:
             widget.setStyleSheet('background:rgb(255,0,0);')
 
     def _set_lin_edit(self, widget, linearity):
-        widget.setText(str(linearity)[0:6])
+        widget.setText('{} [>{}]'.format(str(linearity)[0:6],
+            self.linearity_threshold))
         if linearity > self.linearity_threshold:
             widget.setStyleSheet('background:rgb(0,255,0);')
         else:
