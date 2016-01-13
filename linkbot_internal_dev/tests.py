@@ -298,6 +298,7 @@ class Buzzer(ButtonTest):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._start_time = time.time()
 
     def run(self):
         self.l = self.state['linkbot']
@@ -332,7 +333,7 @@ class Buzzer(ButtonTest):
                 self._lock.release()
                 break
             self._lock.release()
-            f = 50+440+ 440*math.sin(time.time())
+            f = 50+440+ 440*math.sin(time.time()-self._start_time)
             self.l.set_buzzer_frequency(int(f))
         self.l.set_buzzer_frequency(0)
 
@@ -500,11 +501,13 @@ Move motors to zero position.
 Press and hold A and B.
           """
     pixmap_width=300
+    timeout = 120 # 2 minute timeout
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.thread_cond = threading.Condition()
         self._running = False
+        self._start_time = time.time()
 
     def run(self):
         self.l = self.state['linkbot']
@@ -538,6 +541,9 @@ Press and hold A and B.
                 i += 1
             else:
                 i = 0
+                if (time.time()-self._start_time) > self.timeout:
+                    self.failure.emit("Calibration step timed out.")
+                    return
             if i > 5:
                 break
             self.thread_cond.acquire()
