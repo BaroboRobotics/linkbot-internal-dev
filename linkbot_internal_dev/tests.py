@@ -6,6 +6,16 @@ import traceback
 import threading
 import math
 
+from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
+from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
+from linkbot_diagnostics.testlinkbot import TestLinkbot
+import sqlite3 as sql
+import appdirs
+import os
+
+db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
+db_file = os.path.join(db_dir, "database.db")
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -47,11 +57,26 @@ class Start(LinkbotTest):
         self.state = state
 
     def run(self):
+        self.display_db_data()
         self._running = True
         self._lock = threading.Lock()
         self.thread = threading.Thread(target=self._run)
         self.thread.start()
         pass
+
+    def display_db_data(self):
+        try:
+            global db_file
+            con = sql.connect(db_file)
+            cur = con.cursor()
+            cur.execute('''\
+    SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
+                time.strftime('%Y-%m-%d 00:00:00') ) )
+            rows = cur.fetchall()
+            con.close()
+            self.ui.lineEdit.setText(str(len(rows)))
+        except:
+            print(traceback.format_exc())
 
     def deinit(self):
         self._lock.acquire()
@@ -170,14 +195,15 @@ class Final(LinkbotTest):
         self._set_lin_edit(self.ui.lineEdit_m2bl, self.state['linearities'][3])
 
     def _set_speed_edit(self, widget, speed):
-        widget.setText(str(speed)[0:6])
+        widget.setText('{} [>{}]'.format(str(speed)[0:6], self.speed_threshold))
         if abs(speed) > self.speed_threshold:
             widget.setStyleSheet('background:rgb(0,255,0);')
         else:
             widget.setStyleSheet('background:rgb(255,0,0);')
 
     def _set_lin_edit(self, widget, linearity):
-        widget.setText(str(linearity)[0:6])
+        widget.setText('{} [>{}]'.format(str(linearity)[0:6],
+            self.linearity_threshold))
         if linearity > self.linearity_threshold:
             widget.setStyleSheet('background:rgb(0,255,0);')
         else:
@@ -566,17 +592,6 @@ try:
     from linkbot_internal_dev.forms import motor as motor_ui
 except:
     from forms import motor as motor_ui
-
-#import linkbot_diagnostics as diagnostics
-from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
-from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
-from linkbot_diagnostics.testlinkbot import TestLinkbot
-import sqlite3 as sql
-import appdirs
-import os
-
-db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
-db_file = os.path.join(db_dir, "database.db")
 
 class MotorTest(LinkbotTest):
     def __init__(self, *args, state={}, **kwargs):

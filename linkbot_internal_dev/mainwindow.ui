@@ -24,7 +24,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_serial_id">
          <property name="text">
-          <string>Serial ID Programmed</string>
+          <string>Serial ID</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -34,7 +34,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_button">
          <property name="text">
-          <string>Button Test</string>
+          <string>Buttons</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -44,7 +44,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_buzzer">
          <property name="text">
-          <string>Buzzer Test</string>
+          <string>Buzzer</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -54,7 +54,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_led">
          <property name="text">
-          <string>LED Color Test</string>
+          <string>LED Color</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -64,7 +64,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_accelerometer">
          <property name="text">
-          <string>Accelerometer Test</string>
+          <string>Accelerometer</string>
          </property>
          <property name="checkable">
           <bool>true</bool>

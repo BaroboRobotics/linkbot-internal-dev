@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'start.ui'
 #
-# Created: Fri Jan  8 15:06:51 2016
+# Created: Wed Jan 13 12:40:33 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,15 @@ class Ui_Form(object):
         self.label.setWordWrap(True)
         self.label.setObjectName(_fromUtf8("label"))
         self.verticalLayout.addWidget(self.label)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.label_2 = QtGui.QLabel(Form)
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.horizontalLayout.addWidget(self.label_2)
+        self.lineEdit = QtGui.QLineEdit(Form)
+        self.lineEdit.setObjectName(_fromUtf8("lineEdit"))
+        self.horizontalLayout.addWidget(self.lineEdit)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -43,4 +52,5 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(_translate("Form", "Form", None))
         self.label.setText(_translate("Form", "Turn on a Linkbot and plug it in.", None))
+        self.label_2.setText(_translate("Form", "Robots scanned today:", None))
 

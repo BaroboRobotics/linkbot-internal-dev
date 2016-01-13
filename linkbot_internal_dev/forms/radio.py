@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'radio.ui'
 #
-# Created: Fri Jan  8 15:06:50 2016
+# Created: Wed Jan 13 12:40:33 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
