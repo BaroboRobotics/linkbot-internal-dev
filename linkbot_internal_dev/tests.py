@@ -94,6 +94,9 @@ class Start(LinkbotTest):
 
             try:
                 l = linkbot.Linkbot()
+                l.set_buzzer_frequency(440)
+                time.sleep(0.5)
+                l.set_buzzer_frequency(0)
                 self.state.clear()
                 self.state['linkbot'] = l
                 break
@@ -317,7 +320,7 @@ class ButtonB(ButtonTest):
 
 class Buzzer(ButtonTest):
     fontsize=16
-    msg = "Can you hear the buzzer?\n" \
+    msg = "Did you hear the buzzer?\n" \
           "No : A\n" \
           "Yes : B"
     pixmap = ":/images/images/sine.png"
@@ -335,6 +338,8 @@ class Buzzer(ButtonTest):
         self.l.enable_button_events(self.cb)
 
     def cb(self, buttonNo, buttonState, timestamp):
+        if (time.time() - self._start_time) < 2:
+            return
         if buttonState != 0:
             return
         if buttonNo == 0:
@@ -353,13 +358,13 @@ class Buzzer(ButtonTest):
             self.completed.emit()
 
     def _run(self):
-        while True:
+        while (time.time()-self._start_time)<2:
             self._lock.acquire()
             if not self._running:
                 self._lock.release()
                 break
             self._lock.release()
-            f = 50+440+ 440*math.sin(time.time()-self._start_time)
+            f = 50+440+ 440*math.sin(2*(time.time()-self._start_time))
             self.l.set_buzzer_frequency(int(f))
         self.l.set_buzzer_frequency(0)
 
