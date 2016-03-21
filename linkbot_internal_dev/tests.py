@@ -153,7 +153,7 @@ except:
 
 class Final(LinkbotTest):
     speed_threshold = 215
-    linearity_threshold = 0.95
+    linearity_threshold = 0.94
     def __init__(self, *args, state={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = final_ui.Ui_Form()
@@ -529,7 +529,7 @@ class Calibration(ButtonTest):
     fontsize=16
     msg = """\
 Move motors to zero position. 
-Press and hold A and B.
+Press AND HOLD A and B until motors begin moving.
           """
     pixmap_width=300
     timeout = 120 # 2 minute timeout
