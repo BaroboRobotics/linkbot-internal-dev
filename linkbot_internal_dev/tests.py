@@ -135,6 +135,10 @@ class SerialId(LinkbotTest):
             self.message_box("Error", 
                     "Serial ID must be 4 characters in length.")
             return
+        if len(set(['AEIOU0']) & set(self.ui.lineEdit.text().upper())) > 0:
+            self.message_box("Error", 
+                    "Illegal character in serial ID")
+            return
         try:
             l = self.state['linkbot']
             l._setSerialId(self.ui.lineEdit.text().upper())
