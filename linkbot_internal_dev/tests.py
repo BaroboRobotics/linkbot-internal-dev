@@ -70,8 +70,8 @@ class Start(LinkbotTest):
             con = sql.connect(db_file)
             cur = con.cursor()
             cur.execute('''\
-    SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
-                time.strftime('%Y-%m-%d 00:00:00') ) )
+    SELECT DISTINCT Id FROM linearity_tests WHERE Date >= DATE('now', 'weekday 0', '-7 days')
+    ''')
             rows = cur.fetchall()
             con.close()
             self.ui.lineEdit.setText(str(len(rows)))
