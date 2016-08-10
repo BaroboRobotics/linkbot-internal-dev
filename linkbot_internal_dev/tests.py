@@ -1,7 +1,7 @@
 
 from PyQt4 import QtCore, QtGui
 import time
-import linkbot
+import linkbot3 as linkbot
 import traceback
 import threading
 import math
@@ -93,7 +93,7 @@ class Start(LinkbotTest):
             self._lock.release()
 
             try:
-                l = linkbot.Linkbot()
+                l = linkbot.CLinkbot('LOCL')
                 l.set_buzzer_frequency(440)
                 time.sleep(0.5)
                 l.set_buzzer_frequency(0)
@@ -238,11 +238,12 @@ class Radio(LinkbotTest):
 
     def runtest(self):
         try:
-            remote = linkbot.Linkbot('TEST')
+            remote = linkbot.CLinkbot('TEST')
             num_tests = 50
             for i in range(num_tests):
                 remote.get_joint_angles()
                 self.update_progress.emit((i/num_tests) * 100)
+            remote.disconnect()
             self.completed.emit()
         except Exception as e:
             print(e)
@@ -342,6 +343,7 @@ class Buzzer(ButtonTest):
         self.l.enable_button_events(self.cb)
 
     def cb(self, buttonNo, buttonState, timestamp):
+        print('Button cb!!')
         if (time.time() - self._start_time) < 2:
             return
         if buttonState != 0:
@@ -349,16 +351,21 @@ class Buzzer(ButtonTest):
         if buttonNo == 0:
             return
 
+        print(buttonNo, buttonState, timestamp)
+
         self._lock.acquire()
+        print('Lock acquired.')
         self._running = False
         self._lock.release()
         self._thread.join()
-        self.l.set_buzzer_frequency(0)
+        print('Thread joined.')
+        #self.l.set_buzzer_frequency(0)
         if buttonNo == 1:
             # failure
             self.failure.emit("Tester indicated buzzer failure.")
         elif buttonNo == 2:
             # success
+            print('success.')
             self.completed.emit()
 
     def _run(self):
@@ -483,6 +490,7 @@ class AccelerometerTest(ButtonTest):
         self.cb(x,y,z,0)
 
     def deinit(self):
+        print('Accel test deinit.')
         self.l.disable_accelerometer_events()
 
     def cb(self, x, y, z, timestamp):
@@ -552,6 +560,7 @@ Press and hold A and B.
 
     def _run(self):
         # First, wait 10 seconds
+        print('Calibration thread start.')
         self.thread_cond.acquire()
         self.thread_cond.wait(10)
         if not self._running:
@@ -565,8 +574,9 @@ Press and hold A and B.
         while True:
             try:
                 angles = self.l.get_joint_angles()
-                print(angles)
-            except:
+                print('Got joint angles:', angles)
+            except Exception as e:
+                print('Failed to get joint angles: ', e)
                 num_failures += 1
                 time.sleep(1)
                 if num_failures > 10:
@@ -580,6 +590,7 @@ Press and hold A and B.
                     self.failure.emit("Calibration step timed out.")
                     return
             if i > 5:
+                print('Calibration step passed.')
                 break
             self.thread_cond.acquire()
             self.thread_cond.wait(0.5)
@@ -630,10 +641,10 @@ class MotorTest(LinkbotTest):
             cur.execute('SELECT * FROM robot_type WHERE Id=\'{}\''.format(l.getSerialId()))
             rows = cur.fetchall()
             formFactor = None
-            if l.getFormFactor() == linkbot.Linkbot.FormFactor.I:
+            if l.getFormFactor() == linkbot.FormFactor.I:
                 formFactor = "linkbot.Linkbot-I"
                 motor2index = 2
-            elif l.getFormFactor() == linkbot.Linkbot.FormFactor.L:
+            elif l.getFormFactor() == linkbot.FormFactor.L:
                 formFactor = "linkbot.Linkbot-L"
                 motor2index = 1
             else:
