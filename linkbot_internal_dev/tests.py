@@ -55,6 +55,7 @@ class Start(LinkbotTest):
         self.ui = start_ui.Ui_Form()
         self.ui.setupUi(self)
         self.state = state
+        self.parent = args[0]
 
     def run(self):
         self.display_db_data()
@@ -72,6 +73,7 @@ class Start(LinkbotTest):
             cur.execute('''\
     SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
                 time.strftime('%Y-%m-%d 00:00:00') ) )
+            #'
             rows = cur.fetchall()
             con.close()
             self.ui.lineEdit.setText(str(len(rows)))
@@ -99,6 +101,10 @@ class Start(LinkbotTest):
                 l.set_buzzer_frequency(0)
                 self.state.clear()
                 self.state['linkbot'] = l
+                # Check the form factor: If it's a dongle, run the dongle tests.
+                if l.form_factor() == linkbot.FormFactor.DONGLE:
+                    print('Dongle detected.')
+                    self.parent._tests = iter(self.parent.dongle_tests)
                 break
             except RuntimeError:
                 time.sleep(0.5)
@@ -215,6 +221,38 @@ class Final(LinkbotTest):
             widget.setStyleSheet('background:rgb(0,255,0);')
         else:
             widget.setStyleSheet('background:rgb(255,0,0);')
+
+try:
+    from linkbot_internal_dev.forms import final_dongle as final_dongle_ui
+except:
+    from forms import final_dongle as final_dongle_ui
+
+class FinalDongle(LinkbotTest):
+    def __init__(self, *args, state={}, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ui = final_dongle_ui.Ui_Form()
+        self.ui.setupUi(self)
+        self.state = state
+
+    def run(self):
+        self._lock = threading.Lock()
+        self._running = True
+        self._thread = threading.Thread(target = self._run)
+        self._thread.start()
+
+    def _run(self):
+        while True:
+            self._lock.acquire()
+            if not self._running:
+                break
+            self._lock.release()
+            try:
+                print('Waiting for disconnect...')
+                self.state['linkbot'].form_factor()
+            except Exception as e:
+                # The linkbot has been unplugged. Emit the completion signal.
+                self.completed.emit()
+                break
 
 try:
     from linkbot_internal_dev.forms import radio as radio_ui

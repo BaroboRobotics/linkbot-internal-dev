@@ -64,6 +64,11 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.Final, None),
                      ]
 
+        self.dongle_tests = [ 
+                       (tests.Radio, self.ui.checkBox_radio),
+                       (tests.FinalDongle, None),
+                            ]
+
         self._test_state = {}
 
         self.reset_ui()
