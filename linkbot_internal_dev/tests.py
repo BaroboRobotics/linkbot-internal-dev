@@ -186,7 +186,7 @@ class Final(LinkbotTest):
             self._lock.release()
             try:
                 self.state['linkbot'].get_joint_angles()
-            except RuntimeError:
+            except concurrent.futures.TimeoutError:
                 # The linkbot has been unplugged. Emit the completion signal.
                 self.completed.emit()
                 break
@@ -249,7 +249,7 @@ class FinalDongle(LinkbotTest):
             self._lock.release()
             try:
                 self.state['linkbot'].form_factor()
-            except Exception as e:
+            except concurrent.futures.TimeoutError as e:
                 # The linkbot has been unplugged. Emit the completion signal.
                 print('Disconnect detected:', e)
                 self.completed.emit()
