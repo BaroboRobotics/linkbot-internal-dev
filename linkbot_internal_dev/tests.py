@@ -1,7 +1,9 @@
 
+import concurrent
 from PyQt4 import QtCore, QtGui
 import time
 import linkbot3 as linkbot
+linkbot.config(timeout=3)
 import traceback
 import threading
 import math
@@ -106,7 +108,7 @@ class Start(LinkbotTest):
                     print('Dongle detected.')
                     self.parent._tests = iter(self.parent.dongle_tests)
                 break
-            except RuntimeError:
+            except (RuntimeError, concurrent.futures.TimeoutError) as e:
                 time.sleep(0.5)
                 continue
             except Exception:
@@ -247,10 +249,10 @@ class FinalDongle(LinkbotTest):
                 break
             self._lock.release()
             try:
-                print('Waiting for disconnect...')
                 self.state['linkbot'].form_factor()
             except Exception as e:
                 # The linkbot has been unplugged. Emit the completion signal.
+                print('Disconnect detected:', e)
                 self.completed.emit()
                 break
 
