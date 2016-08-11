@@ -19,7 +19,6 @@ try:
 except:
     import tests 
 
-import linkbot
 import threading
 import sys
 import time
@@ -64,6 +63,11 @@ class StartQT4(QtGui.QMainWindow):
                        (tests.MotorTest, self.ui.checkBox_motor_test),
                        (tests.Final, None),
                      ]
+
+        self.dongle_tests = [ 
+                       (tests.Radio, self.ui.checkBox_radio),
+                       (tests.FinalDongle, None),
+                            ]
 
         self._test_state = {}
 
@@ -131,8 +135,8 @@ class StartQT4(QtGui.QMainWindow):
         # Clear the content area
         try:
             self._test_widget.deinit()
-        except:
-            pass
+        except Exception as e:
+            print('Exception occured during deinit:', traceback.format_exc())
         try:
             self.ui.test_content_layout.removeWidget(self._test_widget)
             self._test_widget.hide()
