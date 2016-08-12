@@ -149,7 +149,7 @@ class SerialId(LinkbotTest):
             return
         try:
             l = self.state['linkbot']
-            l._setSerialId(self.ui.lineEdit.text().upper())
+            l._set_serial_id(self.ui.lineEdit.text().upper())
             l.set_buzzer_frequency(440)
             time.sleep(0.4)
             l.set_buzzer_frequency(0)
