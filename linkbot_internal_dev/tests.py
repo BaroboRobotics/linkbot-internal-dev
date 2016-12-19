@@ -8,9 +8,9 @@ import traceback
 import threading
 import math
 
-from linkbot_diagnostics.LinkbotDiagnosticGui import initialize_tables
 from linkbot_diagnostics.LinkbotDiagnosticGui import LinkbotDiagnostic 
 from linkbot_diagnostics.testlinkbot import TestLinkbot
+from linkbot_diagnostics import Database
 import sqlite3 as sql
 import appdirs
 import os
@@ -673,13 +673,6 @@ class MotorTest(LinkbotTest):
                abs(z-1) > 0.1:
                  self.diagnostics_error.emit('Warning',
                          'Accelerometer readings have anomalies!')
-            global db_file
-            con = sql.connect(db_file)
-            initialize_tables(con.cursor())
-            cur = con.cursor()
-# Check to see if this l is in our database already. Add it if not
-            cur.execute('SELECT * FROM robot_type WHERE Id=\'{}\''.format(l.getSerialId()))
-            rows = cur.fetchall()
             formFactor = None
             if l.getFormFactor() == linkbot.FormFactor.I:
                 formFactor = "linkbot.Linkbot-I"
@@ -693,11 +686,10 @@ class MotorTest(LinkbotTest):
             d = LinkbotDiagnostic(l)
             results = d.runLinearityTest()
             now = time.strftime('%Y-%m-%d %H:%M:%S')
-            if len(rows) == 0:
-                cur.execute('INSERT INTO robot_type VALUES(\'{}\', \'{}\')'.format(
-                    l.getSerialId(), formFactor))
-            cur.execute("INSERT INTO linearity_tests "
-                "VALUES('{}', '{}', {}, {}, {}, {}, {}, {}, {}, {})".format(
+
+            with Database() as db:
+                db.check_robot_exists(l)
+                db.insert_robot_linearity(
                     l.getSerialId(),
                     now,
                     results[0]['forward_slope'],
@@ -707,10 +699,8 @@ class MotorTest(LinkbotTest):
                     results[motor2index]['forward_slope'],
                     results[motor2index]['forward_rvalue'],
                     results[motor2index]['backward_slope'],
-                    results[motor2index]['backward_rvalue']))
+                    results[motor2index]['backward_rvalue'])
 
-            con.commit()
-            con.close()
             speeds = [ 
                         results[0]['forward_slope'],
                         results[0]['backward_slope'],
