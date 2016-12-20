@@ -69,16 +69,12 @@ class Start(LinkbotTest):
 
     def display_db_data(self):
         try:
-            global db_file
-            con = sql.connect(db_file)
-            cur = con.cursor()
-            cur.execute('''\
-    SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
-                time.strftime('%Y-%m-%d 00:00:00') ) )
-            #'
-            rows = cur.fetchall()
-            con.close()
-            self.ui.lineEdit.setText(str(len(rows)))
+            with Database() as db:
+                rows = db.fetch_all('''\
+        SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
+                    time.strftime('%Y-%m-%d 00:00:00') ) )
+     
+                self.ui.lineEdit.setText(str(len(rows)))
         except:
             print(traceback.format_exc())
 
