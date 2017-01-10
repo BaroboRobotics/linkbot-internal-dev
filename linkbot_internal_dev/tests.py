@@ -71,7 +71,17 @@ class Start(LinkbotTest):
         try:
             with Database() as db:
                 rows = db.fetch_all('''\
-        SELECT DISTINCT Id FROM linearity_tests WHERE Date >= \'{}\''''.format(
+        SELECT DISTINCT Id FROM linearity_tests WHERE 
+            Date >= \'{}\'
+            AND m1forward_slope > 215
+            AND m1forward_R > 0.94 
+            AND m1backward_slope > 215
+            AND m1backward_R > 0.94
+            AND m2forward_slope > 215
+            AND m2forward_R > 0.94 
+            AND m2backward_slope > 215
+            AND m2backward_R > 0.94
+        '''.format(
                     time.strftime('%Y-%m-%d 00:00:00') ) )
      
                 self.ui.lineEdit.setText(str(len(rows)))
