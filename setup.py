@@ -19,7 +19,7 @@ setup(
          'linkbot-internal-dev=linkbot_internal_dev.linkbot_internal_dev:main',
         ]
     },
-    install_requires = ["PyLinkbot3 >= 3.1.2", "linkbot_diagnostics >= 0.2.1"],
+    install_requires = ["PyLinkbot3 >= 3.1.2", "linkbot_diagnostics >= 0.2.2"],
     description = "Tool for testing Linkbots",
     zip_safe = False,
     include_package_data = True,
