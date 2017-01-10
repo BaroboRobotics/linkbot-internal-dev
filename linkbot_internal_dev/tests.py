@@ -727,6 +727,7 @@ class Failure(LinkbotTest):
     def __init__(self, *args, state = None, msg=None, **kwargs):
         LinkbotTest.__init__(self, *args, **kwargs)
         self.state = state
+        self.fail_message = msg;
         
         vbox = QtGui.QVBoxLayout(self)
         label = QtGui.QLabel(msg, self)
@@ -740,6 +741,16 @@ class Failure(LinkbotTest):
         self.setLayout(vbox)
 
     def run(self):
+        # Enter the failure into the database
+        with Database() as db:
+            now = time.strftime('%Y-%m-%d %H:%M:%S')
+            db.insert_robot_linearity(
+                self.state['linkbot'].getSerialId(),
+                now,
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+                self.fail_message)
+
         self._lock = threading.Lock()
         self._running = True
         self._thread = threading.Thread(target = self._run)
