@@ -290,6 +290,7 @@ class Radio(LinkbotTest):
             for i in range(num_tests):
                 remote.get_joint_angles()
                 self.update_progress.emit((i/num_tests) * 100)
+                time.sleep(0.1)
             remote.disconnect()
             self.completed.emit()
         except Exception as e:
