@@ -3,7 +3,7 @@ import concurrent
 from PyQt4 import QtCore, QtGui
 import time
 import linkbot3 as linkbot
-linkbot.config(timeout=3)
+linkbot.config(use_sfp=True, timeout=3)
 import traceback
 import threading
 import math
@@ -14,6 +14,7 @@ from linkbot_diagnostics import Database
 import sqlite3 as sql
 import appdirs
 import os
+
 
 db_dir = os.path.join(appdirs.user_data_dir(), "linkbot-diagnostics")
 db_file = os.path.join(db_dir, "database.db")
